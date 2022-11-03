@@ -123,7 +123,7 @@ async def shop(ctx: Context, word: str):
     return await ctx.reply(embed=embed)
 
 
-#  검색
+# 전문자료 검색
 @bot.command(name="전문자료")
 async def doc(ctx: Context, word: str):
     data: model.DocNaipy = await naipy.search.doc(word)  # Naipy 데이터 가져옴
