@@ -10,6 +10,8 @@ from config import NaipyBotConfig
 # Naipy 라이브러리
 from naipy import model
 from naipy.client import Search, Translation
+
+
 class naipy:
     search = Search()
     translation = Translation()
@@ -42,10 +44,10 @@ async def search(ctx: Context, word: str):
 async def blog(ctx: Context, word: str):
     data: model.BlogNaipy = await naipy.search.blog(word)  # Naipy 데이터 가져옴
     embed: Embed = Embed(
-        title=data.title.replace('<b>', '**').replace('</b>', '**'), 
-        url=data.link, 
-        description=data.description.replace('<b>', '**').replace('</b>', '**')
-        )
+        title=data.title.replace("<b>", "**").replace("</b>", "**"),
+        url=data.link,
+        description=data.description.replace("<b>", "**").replace("</b>", "**"),
+    )
     embed.set_author(name=data.bloggername, url="https://" + data.bloggerlink)
     return await ctx.reply(embed=embed)
 
@@ -67,13 +69,15 @@ async def book(ctx: Context, word: str):
 @bot.command(name="백과사전")
 async def encyc(ctx: Context, word: str):
     data: model.EncycNaipy = await naipy.search.encyc(word)  # Naipy 데이터 가져옴
-    embed: Embed = Embed(title=data.title.replace('<b>', '**').replace('</b>', '**'), url=data.link)
+    embed: Embed = Embed(
+        title=data.title.replace("<b>", "**").replace("</b>", "**"), url=data.link
+    )
     embed.set_image(url=data.thumbnail)
     embed.add_field(
-        name=f"Description", 
-        value=f"{data.description.replace('<b>', '**').replace('</b>', '**')}", 
-        inline=False
-        )
+        name=f"Description",
+        value=f"{data.description.replace('<b>', '**').replace('</b>', '**')}",
+        inline=False,
+    )
     return await ctx.reply(embed=embed)
 
 
@@ -81,13 +85,17 @@ async def encyc(ctx: Context, word: str):
 @bot.command(name="카페글")
 async def cafearticle(ctx: Context, word: str):
     data: model.CafearticleNaipy = await naipy.search.cafearticle(word)  # Naipy 데이터 가져옴
-    embed: Embed = Embed(title=data.title.replace('<b>', '**').replace('</b>', '**'), url=data.link)
+    embed: Embed = Embed(
+        title=data.title.replace("<b>", "**").replace("</b>", "**"), url=data.link
+    )
     embed.add_field(
-        name=f"Description", 
-        value=f"{data.description.replace('<b>', '**').replace('</b>', '**')}", 
-        inline=False
-        )
-    embed.add_field(name=f"Cafe", value=f"[{data.cafename}](<{data.cafeurl}>)", inline=False)
+        name=f"Description",
+        value=f"{data.description.replace('<b>', '**').replace('</b>', '**')}",
+        inline=False,
+    )
+    embed.add_field(
+        name=f"Cafe", value=f"[{data.cafename}](<{data.cafeurl}>)", inline=False
+    )
     return await ctx.reply(embed=embed)
 
 
@@ -95,12 +103,14 @@ async def cafearticle(ctx: Context, word: str):
 @bot.command(name="지식인")
 async def kin(ctx: Context, word: str):
     data: model.KinNaipy = await naipy.search.kin(word)  # Naipy 데이터 가져옴
-    embed: Embed = Embed(title=data.title.replace('<b>', '**').replace('</b>', '**'), url=data.link)
+    embed: Embed = Embed(
+        title=data.title.replace("<b>", "**").replace("</b>", "**"), url=data.link
+    )
     embed.add_field(
-        name=f"Description", 
-        value=f"{data.description.replace('<b>', '**').replace('</b>', '**')}", 
-        inline=False
-        )
+        name=f"Description",
+        value=f"{data.description.replace('<b>', '**').replace('</b>', '**')}",
+        inline=False,
+    )
     return await ctx.reply(embed=embed)
 
 
@@ -108,15 +118,17 @@ async def kin(ctx: Context, word: str):
 @bot.command(name="쇼핑")
 async def shop(ctx: Context, word: str):
     data: model.ShopNaipy = await naipy.search.shop(word)  # Naipy 데이터 가져옴
-    embed: Embed = Embed(title=data.title.replace('<b>', '**').replace('</b>', '**'), url=data.link)
+    embed: Embed = Embed(
+        title=data.title.replace("<b>", "**").replace("</b>", "**"), url=data.link
+    )
     if data.lprice == "":
         lprice = "없음"
     else:
-        lprice = format(int(data.lprice),',') + "원"
+        lprice = format(int(data.lprice), ",") + "원"
     if data.hprice == "":
         hprice = "없음"
     else:
-        hprice = format(int(data.hprice),',') + "원"
+        hprice = format(int(data.hprice), ",") + "원"
     embed.add_field(name=f"최저가", value=f"`{lprice}`", inline=False)
     embed.add_field(name=f"최고가", value=f"`{hprice}`", inline=False)
     embed.set_image(url=data.image)
@@ -127,12 +139,38 @@ async def shop(ctx: Context, word: str):
 @bot.command(name="전문자료")
 async def doc(ctx: Context, word: str):
     data: model.DocNaipy = await naipy.search.doc(word)  # Naipy 데이터 가져옴
-    embed: Embed = Embed(title=data.title.replace('<b>', '**').replace('</b>', '**'), url=data.link)
+    embed: Embed = Embed(
+        title=data.title.replace("<b>", "**").replace("</b>", "**"), url=data.link
+    )
     embed.add_field(
-        name=f"Description", 
-        value=f"{data.description.replace('<b>', '**').replace('</b>', '**')}", 
-        inline=False
-        )
+        name=f"Description",
+        value=f"{data.description.replace('<b>', '**').replace('</b>', '**')}",
+        inline=False,
+    )
+    return await ctx.reply(embed=embed)
+
+
+# 언어인식
+@bot.command(name="언어인식")
+async def doc(ctx: Context, word: str):
+    data: model.DetectNaipy = await naipy.translation.detect(word)  # Naipy 데이터 가져옴
+    embed: Embed = Embed()
+    embed.add_field(name="입력한 글자", value=f"`{word}`", inline=False)
+    embed.add_field(name="해당 글자의 언어", value=f"`{data.langCode}`", inline=False)
+    return await ctx.reply(embed=embed)
+
+
+# 번역
+@bot.command(name="번역")
+async def doc(ctx: Context, word: str, target: str):
+    data: model.N2mtNaipy = await naipy.translation.translation(
+        word, target
+    )  # Naipy 데이터 가져옴
+    embed: Embed = Embed()
+    embed.add_field(
+        name=f"{data.srcLangType} → {data.tarLangType}",
+        value=f"`{word}` → `{data.translatedText}`",
+    )
     return await ctx.reply(embed=embed)
 
 
