@@ -1,6 +1,8 @@
 # Discord 라이브러리
+import discord
 from discord import Intents
 from discord.ext import commands
+from discord import app_commands
 from discord.ext.commands.context import Context
 from discord.embeds import Embed
 
@@ -10,6 +12,7 @@ from config import NaipyBotConfig
 # Naipy 라이브러리
 from naipy import model
 from naipy.client import Search, Translation
+from naipy.error import HTTPException
 
 
 class naipy:
@@ -28,6 +31,8 @@ bot = commands.Bot(command_prefix="!", help_command=None, intents=intents)
 @bot.event
 async def on_ready():
     print("로그인성공")
+    bot.tree.copy_global_to(guild=discord.Object(id=1037635967831523388))
+    await bot.tree.sync(guild=discord.Object(id=1037635967831523388))
 
 
 # 이미지검색
@@ -152,7 +157,7 @@ async def doc(ctx: Context, word: str):
 
 # 언어인식
 @bot.command(name="언어인식")
-async def doc(ctx: Context, word: str):
+async def dosc(ctx: Context, word: str):
     data: model.DetectNaipy = await naipy.translation.detect(word)  # Naipy 데이터 가져옴
     embed: Embed = Embed()
     embed.add_field(name="입력한 글자", value=f"`{word}`", inline=False)
@@ -162,7 +167,7 @@ async def doc(ctx: Context, word: str):
 
 # 번역
 @bot.command(name="번역")
-async def doc(ctx: Context, word: str, target: str):
+async def dosc(ctx: Context, word: str, target: str):
     data: model.N2mtNaipy = await naipy.translation.translation(
         word, target
     )  # Naipy 데이터 가져옴
@@ -172,6 +177,76 @@ async def doc(ctx: Context, word: str, target: str):
         value=f"`{word}` → `{data.translatedText}`",
     )
     return await ctx.reply(embed=embed)
+
+
+@bot.tree.context_menu(name="언어인식")
+async def detects(interactions: discord.Interaction, word: discord.Message):
+    try:
+        data: model.DetectNaipy = await naipy.translation.detect(
+            word.content
+        )  # Naipy 데이터 가져옴
+    except HTTPException:
+        return await interactions.response.send_message(
+            "지원하지 않는 메세지형식입니다.", ephemeral=True
+        )
+    embed: Embed = Embed()
+    embed.add_field(name="입력한 글자", value=f"`{word.content}`", inline=False)
+    embed.add_field(name="해당 글자의 언어", value=f"`{data.langCode}`", inline=False)
+    return await interactions.response.send_message(embed=embed, ephemeral=True)
+
+
+@bot.tree.context_menu(name="한국어로 번역")
+async def detects(interactions: discord.Interaction, word: discord.Message):
+    try:
+        data: model.N2mtNaipy = await naipy.translation.translation(
+            word.content, "ko"
+        )  # Naipy 데이터 가져옴
+    except HTTPException:
+        return await interactions.response.send_message(
+            "지원하지 않는 메세지형식입니다.", ephemeral=True
+        )
+    embed: Embed = Embed()
+    embed.add_field(
+        name=f"{data.srcLangType} → {data.tarLangType}",
+        value=f"`{word.content}` → `{data.translatedText}`",
+    )
+    return await interactions.response.send_message(embed=embed, ephemeral=True)
+
+
+@bot.tree.context_menu(name="영어로 번역")
+async def detects(interactions: discord.Interaction, word: discord.Message):
+    try:
+        data: model.N2mtNaipy = await naipy.translation.translation(
+            word.content, "en"
+        )  # Naipy 데이터 가져옴
+    except HTTPException:
+        return await interactions.response.send_message(
+            "지원하지 않는 메세지형식입니다.", ephemeral=True
+        )
+    embed: Embed = Embed()
+    embed.add_field(
+        name=f"{data.srcLangType} → {data.tarLangType}",
+        value=f"`{word.content}` → `{data.translatedText}`",
+    )
+    return await interactions.response.send_message(embed=embed, ephemeral=True)
+
+
+@bot.tree.context_menu(name="일본어로 번역")
+async def detects(interactions: discord.Interaction, word: discord.Message):
+    try:
+        data: model.N2mtNaipy = await naipy.translation.translation(
+            word.content, "ja"
+        )  # Naipy 데이터 가져옴
+    except HTTPException:
+        return await interactions.response.send_message(
+            "지원하지 않는 메세지형식입니다.", ephemeral=True
+        )
+    embed: Embed = Embed()
+    embed.add_field(
+        name=f"{data.srcLangType} → {data.tarLangType}",
+        value=f"`{word.content}` → `{data.translatedText}`",
+    )
+    return await interactions.response.send_message(embed=embed, ephemeral=True)
 
 
 # 로그인
