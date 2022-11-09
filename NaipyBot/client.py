@@ -39,7 +39,7 @@ async def on_ready():
 @bot.command(name="이미지")
 async def search(ctx: Context, word: str):
     data: model.ImageNaipy = await naipy.search.image(word)  # Naipy 데이터 가져옴
-    embed: Embed = Embed(title=data.title)
+    embed: Embed = Embed()
     embed.set_image(url=data.link)
     return await ctx.reply(embed=embed)
 
@@ -156,6 +156,29 @@ async def doc(ctx: Context, word: str):
 
 
 # 언어인식
+@bot.command(name="언어인식")
+async def dosc(ctx: Context, word: str):
+    data: model.DetectNaipy = await naipy.translation.detect(word)  # Naipy 데이터 가져옴
+    embed: Embed = Embed()
+    embed.add_field(name="입력한 글자", value=f"`{word}`", inline=False)
+    embed.add_field(name="해당 글자의 언어", value=f"`{data.langCode}`", inline=False)
+    return await ctx.reply(embed=embed)
+
+
+# 번역
+@bot.command(name="번역")
+async def dosc(ctx: Context, word: str, target: str):
+    data: model.N2mtNaipy = await naipy.translation.translation(
+        word, target
+    )  # Naipy 데이터 가져옴
+    embed: Embed = Embed()
+    embed.add_field(
+        name=f"{data.srcLangType} → {data.tarLangType}",
+        value=f"`{word}` → `{data.translatedText}`",
+    )
+    return await ctx.reply(embed=embed)
+
+
 @bot.tree.context_menu(name="언어인식")
 async def detects(interactions: discord.Interaction, word: discord.Message):
     try:
@@ -171,7 +194,7 @@ async def detects(interactions: discord.Interaction, word: discord.Message):
     embed.add_field(name="해당 글자의 언어", value=f"`{data.langCode}`", inline=False)
     return await interactions.response.send_message(embed=embed, ephemeral=True)
 
-# 번역
+
 @bot.tree.context_menu(name="한국어로 번역")
 async def detects(interactions: discord.Interaction, word: discord.Message):
     try:
@@ -222,6 +245,33 @@ async def detects(interactions: discord.Interaction, word: discord.Message):
     embed.add_field(
         name=f"{data.srcLangType} → {data.tarLangType}",
         value=f"`{word.content}` → `{data.translatedText}`",
+    )
+    return await interactions.response.send_message(embed=embed, ephemeral=True)
+
+
+@bot.tree.context_menu(name="다국어로 번역")
+async def dual(interactions: discord.Interaction, word: discord.Message):
+    try:
+        target = ["ko", "en", "ja"]
+        detect = await naipy.translation.detect(word.content)
+        target.remove(detect.langCode) # 언어인식 후 타겟리스트에서 제거
+        data: model.N2mtNaipy = await naipy.translation.dual_translation(
+            text=word.content, target=target
+        )  # Naipy 데이터 가져옴
+    except HTTPException:
+        return await interactions.response.send_message(
+            "지원하지 않는 메세지형식입니다.", ephemeral=True
+        )
+    embed: Embed = Embed()
+    embed.add_field(
+        name=f"{data[0].srcLangType} → {data[0].tarLangType}",
+        value=f"`{word.content}` → `{data[0].translatedText}`",
+        inline=False
+    )
+    embed.add_field(
+        name=f"{data[1].srcLangType} → {data[1].tarLangType}",
+        value=f"`{word.content}` → `{data[1].translatedText}`",
+        inline=False
     )
     return await interactions.response.send_message(embed=embed, ephemeral=True)
 
